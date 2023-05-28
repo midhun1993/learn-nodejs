@@ -1,20 +1,24 @@
 const fs = require("fs"); 
+const todoModel = require("../models/todo.model");
 module.exports = {
-    getList: function(req, res, next) {
-        fs.readFile('./db/todo.json', 'utf8',function (err, data){
-            res.status(200).json(JSON.parse(data));
-        });
+    getList: async function(req, res, next) {
+        try {
+            let resp = await todoModel.find();
+            res.status(200).json(resp);
+        } catch (err) {
+            res.status(500).json(err);
+        }
     },
-    create: function(req, res, next) {
-        const todoItem = req.body;
-        fs.readFile('./db/todo.json', 'utf8',function (err, data){
-            const todoList = JSON.parse(data);
-            todoList.push(todoItem);
-            fs.writeFile('./db/todo.json', JSON.stringify(todoList), function(err, data){
-                res.send("created");
-            })
-        });
-        
+    create: async function(req, res, next) {
+        try {
+            const todoItem = req.body;
+            let resp = await todoModel.create(todoItem);
+            res.status(201).json(resp);
+            next();
+        } catch (err) {
+            res.error = err;
+            next();
+        }
     },
     delete: function(req, res, next) {
         res.send("deleted");
